@@ -1,0 +1,16 @@
+#compdef trial
+
+_lss() {
+    ( /usr/bin/trial_path.py $@ )
+}
+_trial() {
+    local curcontext="$curcontext" state line
+    _arguments \
+        '*: :->pth'
+
+    case $state in
+        *) compadd "$@" `_lss $words[2]`
+    esac
+}
+
+_trial "$@"
