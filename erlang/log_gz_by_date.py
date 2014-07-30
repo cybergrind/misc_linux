@@ -17,8 +17,8 @@ def main(f):
         gz_cmd = 'pigz'
     else:
         gz_cmd = 'gzip'
-    cmd = '%(gz_cmd)s %(f)s && mv %(f)s.gz debug.%(pat)s.gz'%({'f': f, 'pat': pat,
-                                                               'gz_cmd': gz_cmd})
+    cmd = '%(gz_cmd)s %(f)s && mv %(f)s.gz debug.log.%(pat)s.gz'%({'f': f, 'pat': pat,
+                                                                    'gz_cmd': gz_cmd})
     print('Run: %r'%cmd)
     os.system(cmd)
 
