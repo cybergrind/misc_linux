@@ -1,7 +1,6 @@
 #!/usr/bin/env python2
 
 import sys
-import os
 from os.path import exists, isdir, isfile, join
 import glob
 from unittest import TestCase
@@ -9,6 +8,7 @@ from unittest import TestCase
 
 def comp_files(pth, curr=None, rest=None):
     print pth
+
 
 PKG = 'package'
 PYTHON_FILE = 'python_file'
@@ -23,11 +23,13 @@ def comp_dots_start(pth):
     rest = pth.split('.')
     curr = rest.pop(0)
     curr_pth = curr
-    if exists(curr_pth) and isdir(curr_pth) and exists('%s/__init__.py'%curr_pth):
+    if exists(curr_pth) and isdir(curr_pth) and exists('%s/__init__.py' %
+                                                       curr_pth):
         comp_dots(pth, curr, curr_pth, rest, _type=PKG)
         return
-    elif not exists(curr_pth) and exists('%s.py'%curr_pth) and isfile('%s.py'%curr_pth):
-        curr_pth = '%s.py'%curr_pth
+    elif not exists(curr_pth) and exists('%s.py' % curr_pth) \
+          and isfile('%s.py' % curr_pth):  # noqa
+        curr_pth = '%s.py' % curr_pth
         # hack for get module
         _m = __import__(curr)
         __builtins__.__dict__[curr] = _m
@@ -36,17 +38,18 @@ def comp_dots_start(pth):
     else:
         return
 
+
 def comp_dots_package(pth, curr, curr_pth, rest):
     rest = filter(None, rest)
     if len(rest) == 0:
         # complete inner packages and python files
         acc = []
         files = []
-        gl = glob.glob('%s/*'%curr_pth)
+        gl = glob.glob('%s/*' % curr_pth)
         if len(gl) == 0:
-            gl = glob.glob('%s*'%curr_pth)
+            gl = glob.glob('%s*' % curr_pth)
         for i in gl:
-            if isdir(i) and exists('%s/__init__.py'%i):
+            if isdir(i) and exists('%s/__init__.py' % i):
                 acc.append(i.replace('/', '.'))
             elif isfile(i) and i.endswith('.py'):
                 acc.append(i[:-3].replace('/', '.'))
@@ -58,23 +61,26 @@ def comp_dots_package(pth, curr, curr_pth, rest):
             _m = __import__(module_pth)
             __builtins__.__dict__[module_pth.split('.')[0]] = _m
             _module = eval(module_pth)
-            comp_dots(pth, new_curr, _module.__file__, rest, PYTHON_FILE, _module)
+            comp_dots(pth, new_curr, _module.__file__, rest, PYTHON_FILE,
+                      _module)
             return
         for i in acc:
             print i
     elif len(rest) > 1:
         new_curr = rest.pop(0)
         new_pth = join(curr_pth, new_curr)
-        if exists(new_pth) and isdir(new_pth) and exists('%s/__init__.py'%new_pth):
+        if exists(new_pth) and isdir(new_pth) and exists('%s/__init__.py' %
+                                                         new_pth):
             comp_dots(pth, new_curr, new_pth, rest, _type=PKG)
             return
-        file_pth = '%s.py'%new_pth
+        file_pth = '%s.py' % new_pth
         if exists(file_pth):
             module_pth = new_pth.replace('/', '.')
             _m = __import__(module_pth)
             __builtins__.__dict__[module_pth.split('.')[0]] = _m
             _module = eval(module_pth)
-            comp_dots(pth, new_curr, _module.__file__, rest, PYTHON_FILE, _module)
+            comp_dots(pth, new_curr, _module.__file__, rest, PYTHON_FILE,
+                      _module)
             return
     else:
         new_curr = rest.pop(0)
@@ -82,13 +88,13 @@ def comp_dots_package(pth, curr, curr_pth, rest):
             new_pth = join(curr_pth, new_curr)
             comp_dots(pth, new_curr, new_pth, rest, PKG)
             return
-        gl = glob.glob('%s/%s*'%(curr_pth, new_curr))
+        gl = glob.glob('%s/%s*' % (curr_pth, new_curr))
         if len(gl) == 1:
             new_pth = gl[0]
-            if isdir(new_pth) and exists('%s/__init__.py'%new_pth):
+            if isdir(new_pth) and exists('%s/__init__.py' % new_pth):
                 pth = new_pth.replace('/', '.')
                 new_curr = new_pth.split('/')[-1]
-                
+
                 comp_dots(pth, new_curr, new_pth, rest, PKG)
                 return
             elif isfile(new_pth) and new_pth.endswith('.py'):
@@ -96,7 +102,8 @@ def comp_dots_package(pth, curr, curr_pth, rest):
                 _m = __import__(module_pth)
                 __builtins__.__dict__[module_pth.split('.')[0]] = _m
                 _module = eval(module_pth)
-                comp_dots(pth, new_curr, _module.__file__, rest, PYTHON_FILE, _module)
+                comp_dots(pth, new_curr, _module.__file__, rest, PYTHON_FILE,
+                          _module)
                 return
             else:
                 raise Exception('strng')
@@ -104,7 +111,7 @@ def comp_dots_package(pth, curr, curr_pth, rest):
             acc = []
             files = []
             for i in gl:
-                if isdir(i) and exists('%s/__init__.py'%i):
+                if isdir(i) and exists('%s/__init__.py' % i):
                     acc.append(i.replace('/', '.'))
                 elif isfile(i) and i.endswith('.py'):
                     file_name = i[:-3].replace('/', '.')
@@ -116,9 +123,8 @@ def comp_dots_package(pth, curr, curr_pth, rest):
             elif len(acc) == 1:
                 if len(files) == 0:
                     pth = acc[0]
-                    comp_dots(pth, pth.split('.')[-1],
-                              pth.replace('.', '/'), rest,
-                              PKG)
+                    comp_dots(pth, pth.split('.')[-1], pth.replace('.', '/'),
+                              rest, PKG)
                     return
                 else:
                     module_pth = acc[0]
@@ -127,10 +133,10 @@ def comp_dots_package(pth, curr, curr_pth, rest):
                     _m = __import__(module_pth)
                     __builtins__.__dict__[module_pth.split('.')[0]] = _m
                     _module = eval(module_pth)
-                    comp_dots(pth, new_curr, _module.__file__, rest, PYTHON_FILE, _module)
+                    comp_dots(pth, new_curr, _module.__file__, rest,
+                              PYTHON_FILE, _module)
                     return
-        
-        
+
 
 def comp_dots_file(pth, curr, rest, _module):
     mod_name = curr
@@ -139,9 +145,9 @@ def comp_dots_file(pth, curr, rest, _module):
         acc = []
         for i in dir(_module):
             cls = getattr(_module, i)
-            if isinstance(cls, type) and issubclass(cls, TestCase)\
-               and len(filter(lambda x: x.startswith('test'), dir(cls)))>0:
-                acc.append('%s.%s'%(pth, i))
+            if isinstance(cls, type) and issubclass(cls, TestCase) and len(
+                filter(lambda x: x.startswith('test'), dir(cls))) > 0:
+                acc.append('%s.%s' % (pth, i))
         if len(acc) > 1:
             for i in acc:
                 print i
@@ -149,8 +155,10 @@ def comp_dots_file(pth, curr, rest, _module):
             pth = acc[0]
             curr = pth.split('.')[-1]
             _element = getattr(_module, curr)
-            comp_dots(pth, curr, curr_pth=_module.__file__,
-                      rest=rest, _type=PYTHON_CLS,
+            comp_dots(pth, curr,
+                      curr_pth=_module.__file__,
+                      rest=rest,
+                      _type=PYTHON_CLS,
                       element=_element)
     elif len(rest) == 1:
         curr = rest.pop(0)
@@ -159,11 +167,13 @@ def comp_dots_file(pth, curr, rest, _module):
             cls = getattr(_module, i)
             # test that cls is subclass of TestCase
             # and have inner tests
-            if isinstance(cls, type) and issubclass(cls, TestCase)\
-                   and len(filter(lambda x: x.startswith('test'), dir(cls)))>0:
+            if isinstance(cls, type) and issubclass(cls, TestCase) and len(
+                filter(lambda x: x.startswith('test'), dir(cls))) > 0:
                 if i == curr and pth.endswith('.'):
-                    comp_dots(pth, curr, curr_pth=_module.__file__,
-                              rest=rest, _type=PYTHON_CLS,
+                    comp_dots(pth, curr,
+                              curr_pth=_module.__file__,
+                              rest=rest,
+                              _type=PYTHON_CLS,
                               element=getattr(_module, i))
                     return
                 elif i.startswith(curr):
@@ -173,20 +183,25 @@ def comp_dots_file(pth, curr, rest, _module):
             new_pth = pth.split('.')[:-1]
             new_pth.append(acc[0])
             pth = '.'.join(new_pth)
-            
-            comp_dots(pth, curr, curr_pth=_module.__file__,
-                      rest=rest, _type=PYTHON_CLS,
+
+            comp_dots(pth, curr,
+                      curr_pth=_module.__file__,
+                      rest=rest,
+                      _type=PYTHON_CLS,
                       element=_element)
         else:
             for i in acc:
-                print '%s%s.'%(pth, i)
+                print '%s%s.' % (pth, i)
         return
     else:
         curr = rest.pop(0)
         _element = getattr(_module, curr)
-        comp_dots(pth, curr, curr_pth=_module.__file__,
-                  rest=rest, _type=PYTHON_CLS,
+        comp_dots(pth, curr,
+                  curr_pth=_module.__file__,
+                  rest=rest,
+                  _type=PYTHON_CLS,
                   element=_element)
+
 
 def comp_dots_cls(pth, curr, rest, element):
     rest = filter(None, rest)
@@ -195,21 +210,26 @@ def comp_dots_cls(pth, curr, rest, element):
             if i.startswith('test'):
                 _last = pth.split('.')[-1]
                 if _last == element.__name__:
-                    print '%s.%s'%(pth, i)
+                    print '%s.%s' % (pth, i)
                 else:
                     temp_pth = pth.split('.')[:-1]
                     cls_pth = '.'.join(temp_pth)
-                    print '%s.%s'%(cls_pth, i)
+                    print '%s.%s' % (cls_pth, i)
     elif len(rest) == 1:
         temp_pth = pth.split('.')[:-1]
         cls_pth = '.'.join(temp_pth)
         new_curr = rest.pop(0)
         for i in dir(element):
             if i.startswith(new_curr):
-                print '%s.%s'%(cls_pth, i)
-        
-def comp_dots(pth, curr=None, curr_pth=None,
-               rest=None, _type=None, element=None):
+                print '%s.%s' % (cls_pth, i)
+
+
+def comp_dots(pth,
+              curr=None,
+              curr_pth=None,
+              rest=None,
+              _type=None,
+              element=None):
     '''
     pth - current input string
     curr - current part of input
@@ -232,6 +252,7 @@ def comp_dots(pth, curr=None, curr_pth=None,
         return
     raise Exception(_type)
 
+
 def comp_initial(pth):
     if '/' in pth:
         comp_files(pth)
@@ -239,8 +260,8 @@ def comp_initial(pth):
         comp_dots(pth)
     else:
         acc = []
-        for i in glob.glob('%s*'%pth):
-            if isdir(i) and exists('%s/__init__.py'%i):
+        for i in glob.glob('%s*' % pth):
+            if isdir(i) and exists('%s/__init__.py' % i):
                 acc.append(i)
             elif isfile(i) and i.endswith('.py'):
                 print i[:-3]
@@ -250,7 +271,7 @@ def comp_initial(pth):
             for i in acc:
                 print i
     return
-    
+
 
 def complete(pth):
     if pth == '.':
@@ -261,9 +282,7 @@ def complete(pth):
         comp_initial(pth)
 
 
-
 def main():
-    #print sys.argv
     if len(sys.argv) > 1:
         pth = sys.argv[1]
         complete(pth)
